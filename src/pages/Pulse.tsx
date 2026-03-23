@@ -429,7 +429,7 @@ export function Pulse() {
         </div>
       )}
     </div>
-  );
+  );                                                                                                                                      
 }
 
 
