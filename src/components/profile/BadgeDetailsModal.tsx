@@ -1,3 +1,4 @@
+import { createElement } from 'react';
 import { X, Lock } from 'lucide-react';
 import type { ProfileBadge } from '../../types';
 import { resolveBadgeIcon } from './badgeIcons';
@@ -7,12 +8,14 @@ interface BadgeDetailsModalProps {
   onClose: () => void;
 }
 
+function BadgeDetailsIcon({ icon }: { icon: ProfileBadge['icon'] }) {
+  return createElement(resolveBadgeIcon(icon), { size: 20 });
+}
+
 export function BadgeDetailsModal({ badge, onClose }: BadgeDetailsModalProps) {
   if (!badge) {
     return null;
   }
-
-  const Icon = resolveBadgeIcon(badge.icon);
 
   return (
     <div
@@ -27,7 +30,7 @@ export function BadgeDetailsModal({ badge, onClose }: BadgeDetailsModalProps) {
       >
         <div className="mb-4 flex items-start justify-between gap-3">
           <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-300">
-            <Icon size={20} />
+            <BadgeDetailsIcon icon={badge.icon} />
           </div>
           <button
             type="button"
@@ -40,10 +43,14 @@ export function BadgeDetailsModal({ badge, onClose }: BadgeDetailsModalProps) {
         </div>
 
         <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">{badge.title}</h3>
-        <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-300">{badge.description}</p>
+        <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+          {badge.description}
+        </p>
 
         <div className="mt-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 p-3">
-          <p className="text-xs uppercase tracking-[0.08em] text-gray-500 dark:text-gray-400">Criteria</p>
+          <p className="text-xs uppercase tracking-[0.08em] text-gray-500 dark:text-gray-400">
+            Criteria
+          </p>
           <p className="mt-1 text-sm text-gray-700 dark:text-gray-200">{badge.criteria}</p>
         </div>
 

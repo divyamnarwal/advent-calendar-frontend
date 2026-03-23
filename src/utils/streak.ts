@@ -22,10 +22,7 @@ export interface StreakStats {
   longestStreak: number;
 }
 
-export function calculateStreakStats(
-  challenges: UserChallenge[],
-  today = new Date()
-): StreakStats {
+export function calculateStreakStats(challenges: UserChallenge[], today = new Date()): StreakStats {
   const completedDaySerials = new Set<number>();
 
   challenges.forEach((challenge) => {

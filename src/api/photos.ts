@@ -1,5 +1,6 @@
 import { apiDelete, apiGet, apiPost } from './client';
 import type { Photo } from '../types';
+import { compressImage } from '../utils/compressImage';
 
 interface PhotoUploadSignatureResponse {
   cloudName: string;
@@ -49,18 +50,22 @@ export async function deletePhoto(photoId: number): Promise<void> {
 
 export async function uploadPhoto(file: File, caption?: string): Promise<Photo> {
   const signature = await getPhotoUploadSignature();
+  const fileToUpload = await compressImage(file);
 
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append('file', fileToUpload);
   formData.append('api_key', signature.apiKey);
   formData.append('timestamp', String(signature.timestamp));
   formData.append('signature', signature.signature);
   formData.append('folder', signature.folder);
 
-  const response = await fetch(`https://api.cloudinary.com/v1_1/${signature.cloudName}/image/upload`, {
-    method: 'POST',
-    body: formData,
-  });
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${signature.cloudName}/image/upload`,
+    {
+      method: 'POST',
+      body: formData,
+    }
+  );
 
   if (!response.ok) {
     const errorText = await response.text();

@@ -28,9 +28,7 @@ function RecapShell({ children }: RecapShellProps) {
     <div className="min-h-screen recap-shell bg-gradient-to-br from-violet-50 via-purple-50 to-pink-50 dark:from-[#0f0a15] dark:via-[#160c25] dark:to-[#1a0f20]">
       <Navigation />
       <main className="md:ml-64 pb-24 md:pb-8">
-        <div className="max-w-3xl mx-auto px-4 py-8">
-          {children}
-        </div>
+        <div className="max-w-3xl mx-auto px-4 py-8">{children}</div>
       </main>
     </div>
   );
@@ -55,11 +53,12 @@ function RecapEmptyMessage() {
 }
 
 function MotivationMessage({ completed }: { completed: number }) {
-  const message = completed >= 20
-    ? "Incredible! You're on fire!"
-    : completed >= 10
-    ? 'Great progress! Keep it up!'
-    : 'Every challenge completed is a win. Keep going!';
+  const message =
+    completed >= 20
+      ? "Incredible! You're on fire!"
+      : completed >= 10
+        ? 'Great progress! Keep it up!'
+        : 'Every challenge completed is a win. Keep going!';
 
   return (
     <div className="text-center py-8">
@@ -133,7 +132,9 @@ function RecapV2() {
       setPhotos((prev) => prev.filter((photo) => photo.id !== photoId));
       await refresh();
     } catch (deleteErr) {
-      setPhotoDeleteError(deleteErr instanceof Error ? deleteErr.message : 'Failed to delete photo');
+      setPhotoDeleteError(
+        deleteErr instanceof Error ? deleteErr.message : 'Failed to delete photo'
+      );
     } finally {
       setDeletingPhotoIds((prev) => prev.filter((id) => id !== photoId));
     }
@@ -144,7 +145,11 @@ function RecapV2() {
   }
 
   if (status === 'error' && !data) {
-    return <RecapLegacy fallbackMessage={error || 'Recap v2 is unavailable. Showing legacy recap data.'} />;
+    return (
+      <RecapLegacy
+        fallbackMessage={error || 'Recap v2 is unavailable. Showing legacy recap data.'}
+      />
+    );
   }
 
   if (!data) {
@@ -272,7 +277,9 @@ function RecapLegacy({ fallbackMessage }: { fallbackMessage?: string }) {
   const streakStats = useMemo(() => calculateStreakStats(challenges), [challenges]);
 
   const stats = useMemo(() => {
-    const completed = currentMonthChallenges.filter((challenge) => challenge.status === 'COMPLETED');
+    const completed = currentMonthChallenges.filter(
+      (challenge) => challenge.status === 'COMPLETED'
+    );
     const categoryCounts: Record<string, number> = {};
 
     completed.forEach((challenge) => {
@@ -322,7 +329,9 @@ function RecapLegacy({ fallbackMessage }: { fallbackMessage?: string }) {
       await deletePhoto(photoId);
       setPhotos((prev) => prev.filter((photo) => photo.id !== photoId));
     } catch (deleteErr) {
-      setPhotoDeleteError(deleteErr instanceof Error ? deleteErr.message : 'Failed to delete photo');
+      setPhotoDeleteError(
+        deleteErr instanceof Error ? deleteErr.message : 'Failed to delete photo'
+      );
     } finally {
       setDeletingPhotoIds((prev) => prev.filter((id) => id !== photoId));
     }

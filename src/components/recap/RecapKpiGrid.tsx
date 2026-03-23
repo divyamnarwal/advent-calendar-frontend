@@ -24,7 +24,9 @@ function KpiCard({ title, value, subtitle, icon, accentClass }: KpiCardProps) {
     <article className="recap-kpi-card rounded-2xl p-5 border border-gray-100 dark:border-gray-700 bg-white/95 dark:bg-gray-800/95 shadow-soft">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.09em] text-gray-500 dark:text-gray-400">{title}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.09em] text-gray-500 dark:text-gray-400">
+            {title}
+          </p>
           <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-2">{value}</p>
           <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{subtitle}</p>
         </div>
@@ -38,7 +40,10 @@ function KpiCard({ title, value, subtitle, icon, accentClass }: KpiCardProps) {
 
 function formatCategoryLabel(category?: string | null): string {
   if (!category) return 'No dominant category yet';
-  return category.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+  return category
+    .replace(/_/g, ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 export function RecapKpiGrid({
@@ -69,7 +74,11 @@ export function RecapKpiGrid({
       <KpiCard
         title="Top Category"
         value={formatCategoryLabel(topCategory)}
-        subtitle={topCategory ? `${topCategoryCount} completed challenge${topCategoryCount === 1 ? '' : 's'}` : 'Complete more to rank categories'}
+        subtitle={
+          topCategory
+            ? `${topCategoryCount} completed challenge${topCategoryCount === 1 ? '' : 's'}`
+            : 'Complete more to rank categories'
+        }
         icon={<Trophy className="text-violet-600 dark:text-violet-200" size={22} />}
         accentClass="bg-violet-100 dark:bg-violet-900/40"
       />

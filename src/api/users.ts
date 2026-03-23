@@ -1,5 +1,5 @@
 import { apiGet, apiPost } from './client';
-import type { User } from '../types';
+import type { ParticipantView, User } from '../types';
 
 export interface CreateUserData {
   name: string;
@@ -9,6 +9,10 @@ export interface CreateUserData {
 
 export async function getAllUsers(): Promise<User[]> {
   return apiGet<User[]>('/users');
+}
+
+export async function getParticipants(): Promise<ParticipantView[]> {
+  return apiGet<ParticipantView[]>('/users/participants');
 }
 
 export async function getUserById(id: number): Promise<User> {

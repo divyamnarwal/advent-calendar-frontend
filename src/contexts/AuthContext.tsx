@@ -43,17 +43,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { signUp, setActive: setSignUpActive } = useSignUp();
   const clerkJwtTemplate = import.meta.env.VITE_CLERK_JWT_TEMPLATE as string | undefined;
 
-  const toStoredUser = useCallback((appUser: { id: number; name: string; email: string; country: Country }) => {
-    const storedUser: StoredUser = {
-      id: appUser.id,
-      name: appUser.name,
-      email: appUser.email,
-      country: appUser.country,
-    };
-    setStoredUser(storedUser);
-    setUser(storedUser);
-    return storedUser;
-  }, []);
+  const toStoredUser = useCallback(
+    (appUser: { id: number; name: string; email: string; country: Country }) => {
+      const storedUser: StoredUser = {
+        id: appUser.id,
+        name: appUser.name,
+        email: appUser.email,
+        country: appUser.country,
+      };
+      setStoredUser(storedUser);
+      setUser(storedUser);
+      return storedUser;
+    },
+    []
+  );
 
   useEffect(() => {
     const stored = getStoredUser();
@@ -98,7 +101,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const email = clerkUser?.primaryEmailAddress?.emailAddress ?? clerkUser?.emailAddresses[0]?.emailAddress;
+    const email =
+      clerkUser?.primaryEmailAddress?.emailAddress ?? clerkUser?.emailAddresses[0]?.emailAddress;
     if (!email) {
       console.error('[Auth] No email found for Clerk user');
       setIsLoading(false);
@@ -118,12 +122,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       .catch((error: unknown) => {
         console.error('[Auth] Failed to sync authenticated user with backend:', error);
-        console.error('[Auth] Make sure your backend is running at', import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081');
-        const status = typeof error === 'object' && error !== null && 'status' in error
-          ? (error as { status?: number }).status
-          : undefined;
+        console.error(
+          '[Auth] Make sure your backend is running at',
+          import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081'
+        );
+        const status =
+          typeof error === 'object' && error !== null && 'status' in error
+            ? (error as { status?: number }).status
+            : undefined;
         if (status === 401 || status === 403) {
-          console.error('[Auth] Backend rejected auth token. Check Clerk JWT backend config (.env) and token template.');
+          console.error(
+            '[Auth] Backend rejected auth token. Check Clerk JWT backend config (.env) and token template.'
+          );
         }
         clearStoredUser();
         setUser(null);
@@ -133,68 +143,71 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
   }, [isLoaded, isSignedIn, clerkUser, toStoredUser]);
 
-  const loginWithEmail = useCallback(async (payload: EmailLoginPayload) => {
-    if (!isLoaded) {
-      throw new Error('Authentication is still loading');
-    }
-
-    const { mode, name, email, password, country } = payload;
-
-    if (!email.trim() || !password.trim()) {
-      throw new Error('Email and password are required');
-    }
-
-    if (mode === 'sign-up' && !name.trim()) {
-      throw new Error('Name is required for sign up');
-    }
-
-    setIsLoading(true);
-
-    try {
-      if (mode === 'sign-up') {
-        if (!signUp || !setSignUpActive) {
-          throw new Error('Sign up is not available right now');
-        }
-
-        const result = await signUp.create({
-          emailAddress: email.trim(),
-          password,
-          firstName: name.trim(),
-        });
-
-        if (result.status !== 'complete' || !result.createdSessionId) {
-          throw new Error('Email verification is required before sign in');
-        }
-
-        await setSignUpActive({ session: result.createdSessionId });
-      } else {
-        if (!signIn || !setSignInActive) {
-          throw new Error('Sign in is not available right now');
-        }
-
-        const result = await signIn.create({
-          identifier: email.trim(),
-          password,
-        });
-
-        if (result.status !== 'complete' || !result.createdSessionId) {
-          throw new Error('Unable to sign in with email and password');
-        }
-
-        await setSignInActive({ session: result.createdSessionId });
+  const loginWithEmail = useCallback(
+    async (payload: EmailLoginPayload) => {
+      if (!isLoaded) {
+        throw new Error('Authentication is still loading');
       }
 
-      const appUser = await ensureAuthUser({
-        name: name.trim() || clerkUser?.fullName || 'Advent User',
-        email: email.trim(),
-        country,
-      });
+      const { mode, name, email, password, country } = payload;
 
-      toStoredUser(appUser);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [clerkUser?.fullName, isLoaded, setSignInActive, setSignUpActive, signIn, signUp, toStoredUser]);
+      if (!email.trim() || !password.trim()) {
+        throw new Error('Email and password are required');
+      }
+
+      if (mode === 'sign-up' && !name.trim()) {
+        throw new Error('Name is required for sign up');
+      }
+
+      setIsLoading(true);
+
+      try {
+        if (mode === 'sign-up') {
+          if (!signUp || !setSignUpActive) {
+            throw new Error('Sign up is not available right now');
+          }
+
+          const result = await signUp.create({
+            emailAddress: email.trim(),
+            password,
+            firstName: name.trim(),
+          });
+
+          if (result.status !== 'complete' || !result.createdSessionId) {
+            throw new Error('Email verification is required before sign in');
+          }
+
+          await setSignUpActive({ session: result.createdSessionId });
+        } else {
+          if (!signIn || !setSignInActive) {
+            throw new Error('Sign in is not available right now');
+          }
+
+          const result = await signIn.create({
+            identifier: email.trim(),
+            password,
+          });
+
+          if (result.status !== 'complete' || !result.createdSessionId) {
+            throw new Error('Unable to sign in with email and password');
+          }
+
+          await setSignInActive({ session: result.createdSessionId });
+        }
+
+        const appUser = await ensureAuthUser({
+          name: name.trim() || clerkUser?.fullName || 'Advent User',
+          email: email.trim(),
+          country,
+        });
+
+        toStoredUser(appUser);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [clerkUser?.fullName, isLoaded, setSignInActive, setSignUpActive, signIn, signUp, toStoredUser]
+  );
 
   const loginWithGoogle = useCallback(async () => {
     if (!signIn) {
@@ -230,6 +243,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
   if (!context) {

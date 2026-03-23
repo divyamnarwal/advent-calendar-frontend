@@ -50,7 +50,8 @@ export function ChallengeCard({
       <div className="flex items-start justify-between mb-4">
         <span
           className={`px-3 py-1 rounded-full text-xs font-semibold ${
-            categoryColors[challenge.category] || 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+            categoryColors[challenge.category] ||
+            'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
           }`}
         >
           {categoryLabels[challenge.category] || challenge.category}
@@ -68,7 +69,9 @@ export function ChallengeCard({
       </h3>
 
       {/* Description */}
-      <p className="text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">{challenge.description}</p>
+      <p className="text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
+        {challenge.description}
+      </p>
 
       {/* Meta */}
       <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-4">

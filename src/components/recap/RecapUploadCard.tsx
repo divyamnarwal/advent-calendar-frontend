@@ -28,8 +28,12 @@ export function RecapUploadCard({
             <ImagePlus className="text-violet-600 dark:text-violet-200" size={22} />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Add Photo Memory</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Upload moments for this month recap</p>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              Add Photo Memory
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Upload moments for this month recap
+            </p>
           </div>
         </div>
         <button
@@ -66,9 +70,7 @@ export function RecapUploadCard({
           </span>
         </label>
 
-        {uploadError && (
-          <p className="text-sm text-red-600 dark:text-red-400">{uploadError}</p>
-        )}
+        {uploadError && <p className="text-sm text-red-600 dark:text-red-400">{uploadError}</p>}
       </div>
     </section>
   );

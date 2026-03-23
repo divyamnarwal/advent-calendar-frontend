@@ -130,7 +130,8 @@ export function Progress() {
       setShowConfirm(false);
     } catch (err) {
       const message =
-        (err as { message?: string })?.message ?? 'Failed to clear pending challenges. Please try again.';
+        (err as { message?: string })?.message ??
+        'Failed to clear pending challenges. Please try again.';
       setClearError(message);
       console.error('Failed to clear pending challenges:', err);
     } finally {
@@ -167,7 +168,8 @@ export function Progress() {
                   {progress.totalCompleted} completed challenges
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  {pendingChallenges.length} pending and {streakStats.currentStreak} days in your current streak.
+                  {pendingChallenges.length} pending and {streakStats.currentStreak} days in your
+                  current streak.
                 </p>
               </div>
             </section>
@@ -279,8 +281,8 @@ export function Progress() {
                       <Trash2 size={20} className="text-red-500 dark:text-red-400 shrink-0" />
                       <div className="flex-1">
                         <p className="text-sm text-red-800 dark:text-red-200 font-medium">
-                          Are you sure you want to clear all {pendingChallenges.length} pending challenges? This cannot
-                          be undone.
+                          Are you sure you want to clear all {pendingChallenges.length} pending
+                          challenges? This cannot be undone.
                         </p>
                       </div>
                       <div className="flex gap-2">
@@ -311,13 +313,21 @@ export function Progress() {
                       }`}
                     >
                       {clearError ? (
-                        <AlertTriangle size={18} className="text-red-500 dark:text-red-400 mt-0.5" />
+                        <AlertTriangle
+                          size={18}
+                          className="text-red-500 dark:text-red-400 mt-0.5"
+                        />
                       ) : (
-                        <CheckCircle2 size={18} className="text-emerald-600 dark:text-emerald-400 mt-0.5" />
+                        <CheckCircle2
+                          size={18}
+                          className="text-emerald-600 dark:text-emerald-400 mt-0.5"
+                        />
                       )}
                       <p
                         className={`text-sm font-medium ${
-                          clearError ? 'text-red-800 dark:text-red-200' : 'text-emerald-800 dark:text-emerald-200'
+                          clearError
+                            ? 'text-red-800 dark:text-red-200'
+                            : 'text-emerald-800 dark:text-emerald-200'
                         }`}
                       >
                         {clearError ?? clearResult?.message}
@@ -365,7 +375,9 @@ export function Progress() {
             aria-modal="true"
             aria-labelledby="challenge-details-title"
             className={`relative w-full md:w-[420px] h-[88vh] md:h-full bg-white dark:bg-gray-900 shadow-2xl border-t border-gray-200 dark:border-gray-700 md:border-t-0 md:border-l rounded-t-2xl md:rounded-none transition-transform duration-300 ease-out flex flex-col ${
-              isDetailOpen ? 'translate-y-0 md:translate-x-0' : 'translate-y-full md:translate-y-0 md:translate-x-full'
+              isDetailOpen
+                ? 'translate-y-0 md:translate-x-0'
+                : 'translate-y-full md:translate-y-0 md:translate-x-full'
             }`}
           >
             <div className="flex items-start justify-between p-6 border-b border-gray-100 dark:border-gray-800">
@@ -373,7 +385,10 @@ export function Progress() {
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 mb-2">
                   Challenge Details
                 </p>
-                <h2 id="challenge-details-title" className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                <h2
+                  id="challenge-details-title"
+                  className="text-xl font-bold text-gray-900 dark:text-gray-100"
+                >
                   {selectedChallenge.challenge?.title || 'Challenge'}
                 </h2>
               </div>
@@ -402,14 +417,18 @@ export function Progress() {
 
               <div className="space-y-5">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.1em] text-gray-500 dark:text-gray-400 mb-1">Category</p>
+                  <p className="text-xs uppercase tracking-[0.1em] text-gray-500 dark:text-gray-400 mb-1">
+                    Category
+                  </p>
                   <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
                     {selectedChallenge.challenge?.category || '-'}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-xs uppercase tracking-[0.1em] text-gray-500 dark:text-gray-400 mb-1">Description</p>
+                  <p className="text-xs uppercase tracking-[0.1em] text-gray-500 dark:text-gray-400 mb-1">
+                    Description
+                  </p>
                   <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                     {selectedChallenge.challenge?.description || 'No description available.'}
                   </p>
@@ -417,25 +436,37 @@ export function Progress() {
 
                 {selectedChallenge.challenge?.culture && (
                   <div>
-                    <p className="text-xs uppercase tracking-[0.1em] text-gray-500 dark:text-gray-400 mb-1">Culture</p>
-                    <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{selectedChallenge.challenge.culture}</p>
+                    <p className="text-xs uppercase tracking-[0.1em] text-gray-500 dark:text-gray-400 mb-1">
+                      Culture
+                    </p>
+                    <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                      {selectedChallenge.challenge.culture}
+                    </p>
                   </div>
                 )}
 
                 {selectedChallenge.challenge?.energyLevel && (
                   <div>
-                    <p className="text-xs uppercase tracking-[0.1em] text-gray-500 dark:text-gray-400 mb-1">Energy Level</p>
-                    <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{selectedChallenge.challenge.energyLevel}</p>
+                    <p className="text-xs uppercase tracking-[0.1em] text-gray-500 dark:text-gray-400 mb-1">
+                      Energy Level
+                    </p>
+                    <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                      {selectedChallenge.challenge.energyLevel}
+                    </p>
                   </div>
                 )}
 
                 <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
-                  <p className="text-xs uppercase tracking-[0.1em] text-gray-500 dark:text-gray-400 mb-3">Timeline</p>
+                  <p className="text-xs uppercase tracking-[0.1em] text-gray-500 dark:text-gray-400 mb-3">
+                    Timeline
+                  </p>
                   <div className="space-y-3">
                     <div className="flex items-start justify-between gap-3">
                       <p className="text-sm text-gray-600 dark:text-gray-400">Started</p>
                       <p className="text-sm font-medium text-gray-900 dark:text-gray-100 text-right">
-                        {formatDateTime(selectedChallenge.assignedDate ?? selectedChallenge.startTime)}
+                        {formatDateTime(
+                          selectedChallenge.assignedDate ?? selectedChallenge.startTime
+                        )}
                       </p>
                     </div>
                     <div className="flex items-start justify-between gap-3">

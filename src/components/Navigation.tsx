@@ -1,13 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import {
-  Calendar,
-  TrendingUp,
-  Clock,
-  Sparkles,
-  Flame,
-  LogOut,
-  UserRound,
-} from 'lucide-react';
+import { Calendar, TrendingUp, Clock, Sparkles, Flame, LogOut, UserRound } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 interface NavItem {
@@ -52,7 +44,9 @@ export function Navigation() {
             );
           })}
           <button
-            onClick={() => { void logout(); }}
+            onClick={() => {
+              void logout();
+            }}
             className="flex flex-col items-center gap-1 px-3 py-1 rounded-lg text-gray-500 dark:text-gray-400 hover:text-red-500 transition-colors"
           >
             <LogOut size={20} />
@@ -97,7 +91,9 @@ export function Navigation() {
 
         <div className="p-4 border-t border-gray-100 dark:border-gray-800">
           <button
-            onClick={() => { void logout(); }}
+            onClick={() => {
+              void logout();
+            }}
             className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 transition-colors w-full"
           >
             <LogOut size={20} />

@@ -7,7 +7,12 @@ interface RecapHeroProps {
   isRefreshing: boolean;
 }
 
-export function RecapHero({ monthLabel, totalCompleted, totalAssigned, isRefreshing }: RecapHeroProps) {
+export function RecapHero({
+  monthLabel,
+  totalCompleted,
+  totalAssigned,
+  isRefreshing,
+}: RecapHeroProps) {
   return (
     <section className="recap-hero-card rounded-3xl p-7 md:p-9 mb-6 border border-white/40 dark:border-violet-900/30 shadow-soft">
       <div className="flex items-center justify-between gap-4 mb-5">

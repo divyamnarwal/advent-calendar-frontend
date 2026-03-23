@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Navigation } from '../components/Navigation';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { EmptyState } from '../components/EmptyState';
@@ -17,7 +17,7 @@ export function Capsules() {
   const [revealDate, setRevealDate] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const fetchCapsules = async () => {
+  const fetchCapsules = useCallback(async () => {
     if (!user) return;
 
     setIsLoading(true);
@@ -33,11 +33,11 @@ export function Capsules() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchCapsules();
-  }, [user]);
+  }, [fetchCapsules]);
 
   // Set default reveal date to tomorrow
   useEffect(() => {
@@ -99,7 +99,9 @@ export function Capsules() {
       </p>
       <div
         className={`inline-flex items-center gap-2 text-sm ${
-          isRevealed ? 'text-emerald-700 dark:text-emerald-300 font-medium' : 'text-gray-500 dark:text-gray-400'
+          isRevealed
+            ? 'text-emerald-700 dark:text-emerald-300 font-medium'
+            : 'text-gray-500 dark:text-gray-400'
         }`}
       >
         {isRevealed ? <Sparkles size={14} /> : <Clock size={14} />}
@@ -119,9 +121,7 @@ export function Capsules() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 font-serif mb-2">
             Time Capsules
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Send messages to your future self
-          </p>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">Send messages to your future self</p>
           <p className="text-sm text-violet-700/90 dark:text-violet-300/90 mb-6 bg-violet-50/70 dark:bg-violet-950/30 border border-violet-100 dark:border-violet-900/50 rounded-lg px-4 py-2">
             What do you hope your future self remembers about this moment?
           </p>
@@ -175,7 +175,10 @@ export function Capsules() {
               </p>
               <form onSubmit={handleCreate} className="space-y-4">
                 <div>
-                  <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label
+                    htmlFor="content"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  >
                     Your Message
                   </label>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
@@ -193,7 +196,10 @@ export function Capsules() {
                 </div>
 
                 <div>
-                  <label htmlFor="revealDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label
+                    htmlFor="revealDate"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  >
                     Reveal Date
                   </label>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">

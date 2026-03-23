@@ -1,5 +1,15 @@
-import { useMemo, useState } from 'react';
-import { CalendarDays, CheckCircle2, Clock3, Flame, Globe2, Sparkles, Target, Trophy } from 'lucide-react';
+import { useMemo, useState, type ChangeEvent } from 'react';
+import {
+  Camera,
+  CalendarDays,
+  CheckCircle2,
+  Clock3,
+  Flame,
+  Globe2,
+  Sparkles,
+  Target,
+  Trophy,
+} from 'lucide-react';
 import { Calendar } from '../components/Calendar/Calendar';
 import { Navigation } from '../components/Navigation';
 import { MoodSelector } from '../components/MoodSelector';
@@ -11,7 +21,10 @@ import { useAuth } from '../hooks/useAuth';
 import { useCalendar } from '../hooks/useCalendar';
 import { useChallenges } from '../hooks/useChallenges';
 import { useUserChallenges } from '../hooks/useChallenges';
+import { apiGet } from '../api/client';
+import { uploadPhoto } from '../api/photos';
 import { formatMonthYear } from '../utils/dates';
+import { compressImage } from '../utils/compressImage';
 import { calculateStreakStats } from '../utils/streak';
 import type { Mood, DayTile, UserChallenge } from '../types';
 
@@ -20,6 +33,10 @@ const HERO_MOODS: Array<{ value: Mood; label: string }> = [
   { value: 'NEUTRAL', label: 'Balanced' },
   { value: 'HIGH', label: 'Energetic' },
 ];
+
+interface PhotoLimitStatus {
+  remaining: number;
+}
 
 function formatAssignedAge(dateValue?: string): string {
   if (!dateValue) return 'Assigned recently';
@@ -51,7 +68,11 @@ function formatCompletedTime(dateValue?: string): string {
 
 export function Home() {
   const { user } = useAuth();
-  const { challenges, isLoading: isLoadingChallenges, refetch } = useUserChallenges(user?.id ?? null);
+  const {
+    challenges,
+    isLoading: isLoadingChallenges,
+    refetch,
+  } = useUserChallenges(user?.id ?? null);
   const { days, currentMonth } = useCalendar(challenges);
   const todayTile = useMemo(() => days.find((day) => day.isToday) ?? null, [days]);
   const todayChallenge = todayTile?.userChallenge?.challenge;
@@ -62,7 +83,8 @@ export function Home() {
     [challenges]
   );
   const assignedCount = challenges.length;
-  const completionPercent = assignedCount > 0 ? Math.round((completedCount / assignedCount) * 100) : 0;
+  const completionPercent =
+    assignedCount > 0 ? Math.round((completedCount / assignedCount) * 100) : 0;
   const streakStats = useMemo(() => calculateStreakStats(challenges), [challenges]);
 
   const [selectedDay, setSelectedDay] = useState<DayTile | null>(null);
@@ -73,6 +95,11 @@ export function Home() {
   const [showChallengePreview, setShowChallengePreview] = useState(false);
   const [isCompletingToday, setIsCompletingToday] = useState(false);
   const [heroActionError, setHeroActionError] = useState<string | null>(null);
+  const [modalStep, setModalStep] = useState<'details' | 'capture'>('details');
+  const [captureFile, setCaptureFile] = useState<File | null>(null);
+  const [capturePreviewUrl, setCapturePreviewUrl] = useState<string | null>(null);
+  const [captureError, setCaptureError] = useState<string | null>(null);
+  const [isUploadingCapture, setIsUploadingCapture] = useState(false);
 
   const {
     previewedChallenge,
@@ -86,8 +113,20 @@ export function Home() {
     clearPreview,
   } = useChallenges();
 
+  const resetCaptureState = () => {
+    if (capturePreviewUrl) {
+      URL.revokeObjectURL(capturePreviewUrl);
+    }
+    setModalStep('details');
+    setCaptureFile(null);
+    setCapturePreviewUrl(null);
+    setCaptureError(null);
+    setIsUploadingCapture(false);
+  };
+
   const handleDayClick = async (day: DayTile) => {
     if (day.isLocked) return;
+    resetCaptureState();
     setSelectedDay(day);
     setShowMoodSelector(false);
     setShowChallengePreview(false);
@@ -119,7 +158,7 @@ export function Home() {
       await fetchChallengePreview(user.id, mood);
       setShowMoodSelector(false);
       setShowChallengePreview(true);
-    } catch (_err) {
+    } catch {
       // Error handled by hook
     }
   };
@@ -145,19 +184,35 @@ export function Home() {
   };
 
   const handleComplete = async () => {
-    if (!joinedChallenge) return;
+    if (!joinedChallenge || !user) return;
 
     try {
       await completeChallenge(joinedChallenge.id);
       refetch();
-      setSelectedDay(null);
-      setJoinedChallenge(null);
+
+      try {
+        const limitStatus = await apiGet<PhotoLimitStatus>(
+          `/photos/limit-status?userId=${encodeURIComponent(String(user.id))}`
+        );
+
+        if (limitStatus.remaining === 0) {
+          closeChallengeModal();
+          return;
+        }
+      } catch {
+        closeChallengeModal();
+        return;
+      }
+
+      resetCaptureState();
+      setModalStep('capture');
     } catch (err) {
       console.error('Failed to complete challenge:', err);
     }
   };
 
   const closeChallengeModal = () => {
+    resetCaptureState();
     setSelectedDay(null);
     setShowMoodSelector(false);
     setShowChallengePreview(false);
@@ -190,7 +245,7 @@ export function Home() {
     const todayUserChallenge = todayTile?.userChallenge;
     if (!todayUserChallenge || todayUserChallenge.status !== 'ASSIGNED') return;
 
-    const confirmed = window.confirm('Mark today\'s challenge as complete?');
+    const confirmed = window.confirm("Mark today's challenge as complete?");
     if (!confirmed) return;
 
     setIsCompletingToday(true);
@@ -210,6 +265,40 @@ export function Home() {
   const handleHeroViewDetails = () => {
     if (!todayTile) return;
     void handleDayClick(todayTile);
+  };
+
+  const handleCaptureFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    if (capturePreviewUrl) {
+      URL.revokeObjectURL(capturePreviewUrl);
+    }
+
+    setCaptureError(null);
+    setCaptureFile(file);
+    setCapturePreviewUrl(URL.createObjectURL(file));
+  };
+
+  const handleCaptureUpload = async () => {
+    if (!captureFile) {
+      return;
+    }
+
+    setCaptureError(null);
+    setIsUploadingCapture(true);
+
+    try {
+      const compressedFile = await compressImage(captureFile);
+      await uploadPhoto(compressedFile, '');
+      closeChallengeModal();
+    } catch {
+      setCaptureError('Upload failed, try again');
+    } finally {
+      setIsUploadingCapture(false);
+    }
   };
 
   const shouldHighlightMoodSelection = !heroMood && !isLoadingChallenge;
@@ -236,7 +325,7 @@ export function Home() {
             <div className="relative">
               <div className="flex items-start justify-between gap-3 mb-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-violet-600 dark:text-violet-300">
-                  Today's Challenge
+                  Today&apos;s Challenge
                 </p>
 
                 {todayStatus === 'COMPLETED' ? (
@@ -257,7 +346,8 @@ export function Home() {
                     {todayChallenge?.title || "Today's Challenge"}
                   </h1>
                   <p className="text-gray-600 dark:text-gray-400 mb-4 max-w-2xl leading-relaxed">
-                    {todayChallenge?.description || 'Your challenge is ready. Complete it to keep your streak alive.'}
+                    {todayChallenge?.description ||
+                      'Your challenge is ready. Complete it to keep your streak alive.'}
                   </p>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
                     <button
@@ -269,7 +359,10 @@ export function Home() {
                     </button>
                     <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold bg-violet-100/90 dark:bg-violet-900/45 text-violet-700 dark:text-violet-200 border border-violet-200/90 dark:border-violet-700/80">
                       <Clock3 size={15} className="text-fuchsia-500 dark:text-fuchsia-300" />
-                      {formatAssignedAge(todayTile?.userChallenge?.assignedDate ?? todayTile?.userChallenge?.startTime)}
+                      {formatAssignedAge(
+                        todayTile?.userChallenge?.assignedDate ??
+                          todayTile?.userChallenge?.startTime
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-3 text-sm text-gray-600 dark:text-gray-300">
@@ -293,7 +386,8 @@ export function Home() {
                   </p>
                   <div className="rounded-2xl border border-green-200 dark:border-green-900/50 bg-green-50 dark:bg-green-900/20 px-4 py-3 mb-5">
                     <p className="text-sm font-medium text-green-800 dark:text-green-200">
-                      Great job. You've kept your streak alive. Come back tomorrow for a new challenge.
+                      Great job. You&apos;ve kept your streak alive. Come back tomorrow for a new
+                      challenge.
                     </p>
                   </div>
                   <button
@@ -309,7 +403,8 @@ export function Home() {
                     Unlock your personalized challenge
                   </h1>
                   <p className="text-gray-600 dark:text-gray-400 mb-5 max-w-2xl">
-                    Choose your mood to unlock today's challenge and set the tone for your progress.
+                    Choose your mood to unlock today&apos;s challenge and set the tone for your
+                    progress.
                   </p>
 
                   {shouldHighlightMoodSelection && (
@@ -340,7 +435,9 @@ export function Home() {
                     ))}
                   </div>
                   <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 font-medium">
-                    {heroMood ? 'Mood selected. You can now unlock your challenge.' : 'Select one mood to enable unlock.'}
+                    {heroMood
+                      ? 'Mood selected. You can now unlock your challenge.'
+                      : 'Select one mood to enable unlock.'}
                   </p>
 
                   <button
@@ -351,8 +448,8 @@ export function Home() {
                     {isLoadingChallenge
                       ? 'Unlocking...'
                       : heroMood
-                      ? 'Unlock My Challenge'
-                      : 'Select a mood to continue'}
+                        ? 'Unlock My Challenge'
+                        : 'Select a mood to continue'}
                   </button>
                 </>
               )}
@@ -369,10 +466,10 @@ export function Home() {
                       todayStatus
                         ? undefined
                         : heroMood
-                        ? () => {
-                            void handleHeroUnlock();
-                          }
-                        : undefined
+                          ? () => {
+                              void handleHeroUnlock();
+                            }
+                          : undefined
                     }
                   />
                 </div>
@@ -395,24 +492,29 @@ export function Home() {
                   <Flame size={13} className="text-orange-500" />
                   Streak
                 </p>
-                <p className="text-xl font-bold text-gray-800 dark:text-gray-200">{streakStats.currentStreak}</p>
+                <p className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                  {streakStats.currentStreak}
+                </p>
               </div>
               <div className="rounded-xl border border-gray-200/85 dark:border-gray-700/75 bg-white/60 dark:bg-gray-800/45 px-3 py-3">
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 inline-flex items-center gap-1">
                   <Trophy size={13} className="text-violet-500" />
                   Completed
                 </p>
-                <p className="text-xl font-bold text-gray-800 dark:text-gray-200">{completedCount}</p>
+                <p className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                  {completedCount}
+                </p>
               </div>
               <div className="rounded-xl border border-gray-200/85 dark:border-gray-700/75 bg-white/60 dark:bg-gray-800/45 px-3 py-3">
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 inline-flex items-center gap-1">
                   <Target size={13} className="text-teal-500" />
                   Progress
                 </p>
-                <p className="text-xl font-bold text-gray-800 dark:text-gray-200">{completionPercent}%</p>
+                <p className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                  {completionPercent}%
+                </p>
               </div>
             </div>
-
           </section>
 
           {/* Tertiary: Calendar Navigator */}
@@ -422,7 +524,9 @@ export function Home() {
                 <CalendarDays size={14} />
                 Calendar Navigator
               </div>
-              <p className="text-xs text-gray-400 dark:text-gray-500">{formatMonthYear(currentMonth)}</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500">
+                {formatMonthYear(currentMonth)}
+              </p>
             </div>
 
             {isLoadingChallenges ? (
@@ -452,7 +556,11 @@ export function Home() {
               {/* Header */}
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 font-serif">
-                  {selectedDay.isToday ? "Today's Challenge" : `Day ${selectedDay.dayOfMonth}`}
+                  {modalStep === 'capture'
+                    ? 'Challenge Complete! 🎉'
+                    : selectedDay.isToday
+                      ? "Today's Challenge"
+                      : `Day ${selectedDay.dayOfMonth}`}
                 </h3>
                 <button
                   onClick={closeChallengeModal}
@@ -463,7 +571,81 @@ export function Home() {
               </div>
 
               {/* Mood Selector (for today without challenge) */}
-              {showMoodSelector ? (
+              {modalStep === 'capture' ? (
+                <div className="space-y-5">
+                  <div className="text-center">
+                    <h4 className="text-2xl font-bold text-gray-900 dark:text-gray-100 font-serif">
+                      Capture this moment 📸
+                    </h4>
+                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                      Add a photo to your monthly recap (optional)
+                    </p>
+                  </div>
+
+                  <label className="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-violet-300 dark:border-violet-700 bg-violet-50/70 dark:bg-violet-900/10 px-6 py-8 text-center transition-colors hover:bg-violet-100/70 dark:hover:bg-violet-900/20">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleCaptureFileChange}
+                      className="hidden"
+                    />
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white dark:bg-gray-800 text-violet-600 dark:text-violet-300 shadow-sm">
+                      <Camera size={24} />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-violet-700 dark:text-violet-300">
+                        Choose a photo
+                      </p>
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        Tap here to upload an image for your recap
+                      </p>
+                    </div>
+
+                    {capturePreviewUrl && (
+                      <img
+                        src={capturePreviewUrl}
+                        alt="Selected challenge photo preview"
+                        className="h-20 w-20 rounded-xl object-cover border border-white/80 dark:border-gray-700 shadow-sm"
+                      />
+                    )}
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={handleCaptureUpload}
+                    disabled={!captureFile || isUploadingCapture}
+                    className="w-full py-3 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white rounded-xl font-semibold hover:from-violet-600 hover:to-fuchsia-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isUploadingCapture ? (
+                      <>
+                        <LoadingSpinner size="small" className="text-white" />
+                        Uploading...
+                      </>
+                    ) : (
+                      'Upload & Close'
+                    )}
+                  </button>
+
+                  {captureError && (
+                    <p className="text-sm text-center text-red-600 dark:text-red-400">
+                      Upload failed, try again
+                    </p>
+                  )}
+
+                  <div className="text-center">
+                    <a
+                      href="#"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        closeChallengeModal();
+                      }}
+                      className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                    >
+                      Skip
+                    </a>
+                  </div>
+                </div>
+              ) : showMoodSelector ? (
                 <MoodSelector
                   selected={selectedMood}
                   onSelect={handleMoodSelect}
@@ -494,18 +676,18 @@ export function Home() {
               ) : selectedDay.isToday ? (
                 <div className="text-center py-8">
                   <p className="text-gray-600 dark:text-gray-400">
-                    Select your mood to get today's challenge!
+                    Select your mood to get today&apos;s challenge!
                   </p>
                 </div>
               ) : (
                 <div className="text-center py-8">
                   <p className="text-gray-600 dark:text-gray-400">
-                    This day's challenge is not available yet.
+                    This day&apos;s challenge is not available yet.
                   </p>
                 </div>
               )}
 
-              {challengeError && (
+              {challengeError && modalStep !== 'capture' && (
                 <ErrorBanner
                   message={challengeError}
                   onDismiss={clearError}

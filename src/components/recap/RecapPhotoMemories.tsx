@@ -19,7 +19,9 @@ export function RecapPhotoMemories({
 
   return (
     <section className="mt-2">
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">Photo Memories</h2>
+      <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
+        Photo Memories
+      </h2>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {photos.map((photo) => (
           <article
@@ -44,9 +46,7 @@ export function RecapPhotoMemories({
               loading="lazy"
             />
             {photo.caption && (
-              <p className="text-xs text-gray-600 dark:text-gray-300 px-3 py-2">
-                {photo.caption}
-              </p>
+              <p className="text-xs text-gray-600 dark:text-gray-300 px-3 py-2">{photo.caption}</p>
             )}
           </article>
         ))}

@@ -1,3 +1,4 @@
+import { createElement } from 'react';
 import { Lock } from 'lucide-react';
 import type { ProfileBadge } from '../../types';
 import { resolveBadgeIcon } from './badgeIcons';
@@ -7,9 +8,11 @@ interface BadgeCardProps {
   onClick: (badge: ProfileBadge) => void;
 }
 
-export function BadgeCard({ badge, onClick }: BadgeCardProps) {
-  const Icon = resolveBadgeIcon(badge.icon);
+function BadgeCardIcon({ icon }: { icon: ProfileBadge['icon'] }) {
+  return createElement(resolveBadgeIcon(icon), { size: 18 });
+}
 
+export function BadgeCard({ badge, onClick }: BadgeCardProps) {
   return (
     <button
       type="button"
@@ -34,11 +37,13 @@ export function BadgeCard({ badge, onClick }: BadgeCardProps) {
             : 'bg-white/70 dark:bg-gray-700 text-gray-500 dark:text-gray-300'
         }`}
       >
-        <Icon size={18} />
+        <BadgeCardIcon icon={badge.icon} />
       </div>
 
       <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{badge.title}</p>
-      <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 line-clamp-2">{badge.description}</p>
+      <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
+        {badge.description}
+      </p>
       <p className="mt-3 text-[11px] uppercase tracking-[0.08em] text-gray-500 dark:text-gray-400">
         {badge.earned ? 'Earned' : 'Locked'}
       </p>

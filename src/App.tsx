@@ -4,7 +4,7 @@ import { Onboard } from './pages/Onboard';
 import { Home } from './pages/Home';
 import { Progress } from './pages/Progress';
 import { Capsules } from './pages/Capsules';
-import { Recap } from './pages/Recap';
+import { RecapPage } from './pages/RecapPage';
 import { Pulse } from './pages/Pulse';
 import { Profile } from './pages/Profile';
 import { SsoCallback } from './pages/SsoCallback';
@@ -96,7 +96,7 @@ function App() {
             path="/recap"
             element={
               <ProtectedRoute>
-                <Recap />
+                <RecapPage />
               </ProtectedRoute>
             }
           />

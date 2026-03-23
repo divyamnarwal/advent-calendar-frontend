@@ -16,7 +16,10 @@ export function BadgeUnlockCelebration({ badges, isOpen, onClose }: BadgeUnlockC
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/65 p-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/65 p-4"
+      onClick={onClose}
+    >
       <div
         role="dialog"
         aria-modal="true"
@@ -26,7 +29,6 @@ export function BadgeUnlockCelebration({ badges, isOpen, onClose }: BadgeUnlockC
         <div className="pointer-events-none absolute inset-0">
           {Array.from({ length: 28 }).map((_, index) => (
             <span
-              // eslint-disable-next-line react/no-array-index-key
               key={index}
               className="confetti-piece"
               style={{
@@ -52,7 +54,9 @@ export function BadgeUnlockCelebration({ badges, isOpen, onClose }: BadgeUnlockC
             <Sparkles size={14} />
             Badge Unlocked
           </div>
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Achievement unlocked!</h3>
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            Achievement unlocked!
+          </h3>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
             You earned new badge rewards. Keep the momentum going.
           </p>
@@ -69,7 +73,9 @@ export function BadgeUnlockCelebration({ badges, isOpen, onClose }: BadgeUnlockC
                     <Icon size={18} />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{badge.title}</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                      {badge.title}
+                    </p>
                     <p className="text-xs text-gray-600 dark:text-gray-300">{badge.description}</p>
                   </div>
                 </div>

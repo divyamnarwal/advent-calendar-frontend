@@ -22,7 +22,9 @@ export async function getUserChallengesByStatus(
 }
 
 export async function joinChallenge(userId: number, challengeId: number): Promise<UserChallenge> {
-  return apiPost<UserChallenge>(`/user-challenges/join?userId=${userId}&challengeId=${challengeId}`);
+  return apiPost<UserChallenge>(
+    `/user-challenges/join?userId=${userId}&challengeId=${challengeId}`
+  );
 }
 
 export async function markComplete(userChallengeId: number): Promise<UserChallenge> {
@@ -47,7 +49,9 @@ export async function deleteUserChallenge(userChallengeId: number): Promise<void
 export async function clearPendingChallenges(
   userId: number
 ): Promise<ClearPendingChallengesResponse> {
-  return apiDelete<ClearPendingChallengesResponse>(`/user-challenges/clear-pending?userId=${userId}`);
+  return apiDelete<ClearPendingChallengesResponse>(
+    `/user-challenges/clear-pending?userId=${userId}`
+  );
 }
 
 export async function startChallenge(

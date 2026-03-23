@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { ThemePreference } from '../types';
 
 type AppliedTheme = 'light' | 'dark';
@@ -52,9 +45,11 @@ function readInitialThemePreference(): ThemePreference {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [themePreference, setThemePreferenceState] = useState<ThemePreference>(readInitialThemePreference);
-  const [systemPrefersDark, setSystemPrefersDark] = useState<boolean>(() =>
-    window.matchMedia('(prefers-color-scheme: dark)').matches
+  const [themePreference, setThemePreferenceState] = useState<ThemePreference>(
+    readInitialThemePreference
+  );
+  const [systemPrefersDark, setSystemPrefersDark] = useState<boolean>(
+    () => window.matchMedia('(prefers-color-scheme: dark)').matches
   );
 
   const theme = useMemo(
@@ -93,6 +88,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useTheme() {
   const context = useContext(ThemeContext);
   if (!context) {

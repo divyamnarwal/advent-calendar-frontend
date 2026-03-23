@@ -127,7 +127,10 @@ export function Onboard() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {mode === 'sign-up' && (
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
                   Your Name
                 </label>
                 <input
@@ -143,7 +146,10 @@ export function Onboard() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
                 Email Address
               </label>
               <input
@@ -158,7 +164,10 @@ export function Onboard() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
                 Password
               </label>
               <div className="relative">
@@ -185,7 +194,10 @@ export function Onboard() {
 
             {mode === 'sign-up' && (
               <div>
-                <label htmlFor="country" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label
+                  htmlFor="country"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
                   Campus / Region
                 </label>
                 <select
@@ -214,8 +226,10 @@ export function Onboard() {
                   <LoadingSpinner size="small" />
                   Authenticating...
                 </span>
+              ) : mode === 'sign-up' ? (
+                'Start My Journey'
               ) : (
-                mode === 'sign-up' ? 'Start My Journey' : 'Continue to Campus Advent'
+                'Continue to Campus Advent'
               )}
             </button>
 
@@ -226,11 +240,7 @@ export function Onboard() {
               className="w-full py-3 border border-violet-200 dark:border-violet-500/40 rounded-xl font-semibold text-gray-700 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_0_3px_rgba(168,85,247,0.14)] dark:hover:shadow-[0_0_0_3px_rgba(192,132,252,0.2)]"
             >
               <span className="inline-flex items-center justify-center gap-2">
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  className="h-5 w-5"
-                >
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5">
                   <path
                     fill="#4285F4"
                     d="M21.6 12.23c0-.68-.06-1.33-.17-1.95H12v3.68h5.39a4.6 4.6 0 0 1-2 3.01v2.5h3.24c1.9-1.75 2.97-4.33 2.97-7.24Z"

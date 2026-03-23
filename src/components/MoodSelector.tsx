@@ -12,19 +12,22 @@ const moods: { value: Mood; label: string; icon: React.ReactNode; color: string 
     value: 'LOW',
     label: 'Chill',
     icon: <BatteryLow size={24} />,
-    color: 'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 hover:bg-teal-200 dark:hover:bg-teal-900/50 border-teal-200 dark:border-teal-800',
+    color:
+      'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 hover:bg-teal-200 dark:hover:bg-teal-900/50 border-teal-200 dark:border-teal-800',
   },
   {
     value: 'NEUTRAL',
     label: 'Balanced',
     icon: <Zap size={24} />,
-    color: 'bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 hover:bg-violet-200 dark:hover:bg-violet-900/50 border-violet-200 dark:border-violet-800',
+    color:
+      'bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 hover:bg-violet-200 dark:hover:bg-violet-900/50 border-violet-200 dark:border-violet-800',
   },
   {
     value: 'HIGH',
     label: 'Energetic',
     icon: <Flame size={24} />,
-    color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/50 border-orange-200 dark:border-orange-800',
+    color:
+      'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/50 border-orange-200 dark:border-orange-800',
   },
 ];
 

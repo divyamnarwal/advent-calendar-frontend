@@ -13,15 +13,18 @@ function isString(value: unknown): value is string {
 }
 
 function isRecapPhotoArray(value: unknown): value is MonthlyRecapResponse['recentPhotos'] {
-  return Array.isArray(value) && value.every((item) => {
-    if (!isObject(item)) return false;
-    return (
-      isNumber(item.id) &&
-      isString(item.secureUrl) &&
-      (item.caption === undefined || item.caption === null || isString(item.caption)) &&
-      isString(item.createdAt)
-    );
-  });
+  return (
+    Array.isArray(value) &&
+    value.every((item) => {
+      if (!isObject(item)) return false;
+      return (
+        isNumber(item.id) &&
+        isString(item.secureUrl) &&
+        (item.caption === undefined || item.caption === null || isString(item.caption)) &&
+        isString(item.createdAt)
+      );
+    })
+  );
 }
 
 export function parseMonthlyRecapResponse(value: unknown): MonthlyRecapResponse {
@@ -37,7 +40,9 @@ export function parseMonthlyRecapResponse(value: unknown): MonthlyRecapResponse 
     !isNumber(value.totalCompletedThisMonth) ||
     !isNumber(value.currentStreakDays) ||
     !isNumber(value.longestStreakDays) ||
-    (value.topCategory !== undefined && value.topCategory !== null && !isString(value.topCategory)) ||
+    (value.topCategory !== undefined &&
+      value.topCategory !== null &&
+      !isString(value.topCategory)) ||
     !isNumber(value.topCategoryCount) ||
     !isNumber(value.capsulesCreatedThisMonth) ||
     !isNumber(value.capsulesUnlockedThisMonth) ||

@@ -150,6 +150,13 @@ export interface PulseParticipant {
   country: Country;
 }
 
+export interface ParticipantView {
+  id: number;
+  name: string;
+  initials: string;
+  culture: string;
+}
+
 export interface StoredUser {
   id: number;
   name: string;

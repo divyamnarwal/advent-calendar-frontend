@@ -85,8 +85,18 @@ export function parseDateToLocalDay(value: string): Date | null {
 
 export function getMonthName(monthIndex: number): string {
   const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
   return monthNames[monthIndex];
 }

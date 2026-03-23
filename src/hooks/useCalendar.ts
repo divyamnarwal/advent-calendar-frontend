@@ -1,5 +1,12 @@
 import { useMemo, useEffect, useState } from 'react';
-import { getToday, getDaysInMonth, isSameDay, isFuture, isPast, parseDateToLocalDay } from '../utils/dates';
+import {
+  getToday,
+  getDaysInMonth,
+  isSameDay,
+  isFuture,
+  isPast,
+  parseDateToLocalDay,
+} from '../utils/dates';
 import type { DayTile, UserChallenge } from '../types';
 
 interface UseCalendarReturn {
@@ -56,7 +63,10 @@ export function useCalendar(userChallenges?: UserChallenge[]): UseCalendarReturn
           return;
         }
 
-        if (nextPriority === existingPriority && getAssignedTime(challenge) > getAssignedTime(existing)) {
+        if (
+          nextPriority === existingPriority &&
+          getAssignedTime(challenge) > getAssignedTime(existing)
+        ) {
           challengeByDay.set(dayKey, challenge);
         }
       });

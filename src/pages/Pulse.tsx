@@ -4,31 +4,25 @@ import { LoadingSpinner } from '../components/LoadingSpinner';
 import { EmptyState } from '../components/EmptyState';
 import { Flame, Users, Zap, Globe, X, ChevronRight } from 'lucide-react';
 import { getPulseToday } from '../api/pulse';
-import { getAllUsers } from '../api/users';
+import { getParticipants } from '../api/users';
 import { getUserProgress } from '../api/userChallenges';
 import { useAuth } from '../hooks/useAuth';
-import type { Country, PulseParticipant, PulseStats, Progress } from '../types';
+import type { PulseStats, Progress, ParticipantView } from '../types';
 
 const MILESTONES = [10, 25, 50, 100, 200] as const;
 
-function sortParticipants(participants: PulseParticipant[]): PulseParticipant[] {
+function sortParticipants(participants: ParticipantView[]): ParticipantView[] {
   return [...participants].sort((a, b) =>
     a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
   );
 }
 
-function getInitials(name: string): string {
-  const initials = name
-    .split(/\s+/)
+function formatCultureLabel(culture: string): string {
+  return culture
+    .split(/[_\s-]+/)
     .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join('');
-  return initials || '?';
-}
-
-function formatCountryLabel(country: Country): string {
-  return country.charAt(0) + country.slice(1).toLowerCase();
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(' ');
 }
 
 export function Pulse() {
@@ -37,32 +31,22 @@ export function Pulse() {
   const [userProgress, setUserProgress] = useState<Progress | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [participants, setParticipants] = useState<PulseParticipant[]>([]);
-  const [participantsSource, setParticipantsSource] = useState<'pulse' | 'fallback' | null>(null);
+  const [participants, setParticipants] = useState<ParticipantView[]>([]);
   const [participantsLoading, setParticipantsLoading] = useState(false);
   const [participantsError, setParticipantsError] = useState<string | null>(null);
   const [isParticipantsDrawerOpen, setIsParticipantsDrawerOpen] = useState(false);
   const [reactorFill, setReactorFill] = useState(0);
 
-  const loadFallbackParticipants = useCallback(async () => {
+  const fetchParticipants = useCallback(async () => {
     setParticipantsLoading(true);
     setParticipantsError(null);
-    setParticipantsSource('fallback');
 
     try {
-      const users = await getAllUsers();
-      setParticipants(
-        sortParticipants(
-          users.map((participant) => ({
-            id: participant.id,
-            name: participant.name,
-            country: participant.country,
-          }))
-        )
-      );
+      const users = await getParticipants();
+      setParticipants(sortParticipants(users));
     } catch (err) {
       setParticipants([]);
-      setParticipantsError(err instanceof Error ? err.message : 'Failed to fetch participant list');
+      setParticipantsError(err instanceof Error ? err.message : 'Failed to fetch participants');
     } finally {
       setParticipantsLoading(false);
     }
@@ -76,22 +60,12 @@ export function Pulse() {
     try {
       const data = await getPulseToday();
       setPulse(data);
-
-      if (Array.isArray(data.activeParticipants)) {
-        setParticipants(sortParticipants(data.activeParticipants));
-        setParticipantsSource('pulse');
-        setParticipantsLoading(false);
-        return;
-      }
-
-      void loadFallbackParticipants();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch pulse data');
-      setParticipantsLoading(false);
     } finally {
       setIsLoading(false);
     }
-  }, [loadFallbackParticipants]);
+  }, []);
 
   const fetchUserProgress = useCallback(async () => {
     if (!user) return;
@@ -105,8 +79,9 @@ export function Pulse() {
 
   useEffect(() => {
     void fetchPulse();
+    void fetchParticipants();
     void fetchUserProgress();
-  }, [fetchPulse, fetchUserProgress]);
+  }, [fetchParticipants, fetchPulse, fetchUserProgress]);
 
   useEffect(() => {
     if (!isParticipantsDrawerOpen) return;
@@ -143,7 +118,9 @@ export function Pulse() {
       [...MILESTONES].reverse().find((milestone) => milestone <= completedCount) ?? 0;
     const span = nextMilestone - previousMilestone;
     const progressPercent =
-      span <= 0 ? 0 : Math.min(100, Math.max(0, ((completedCount - previousMilestone) / span) * 100));
+      span <= 0
+        ? 0
+        : Math.min(100, Math.max(0, ((completedCount - previousMilestone) / span) * 100));
 
     return {
       nextMilestone,
@@ -159,17 +136,8 @@ export function Pulse() {
     return () => window.cancelAnimationFrame(frameId);
   }, [milestoneProgress.progressPercent]);
 
-  const participantsSourceLabel =
-    participantsSource === 'pulse'
-      ? 'Live active participants'
-      : participantsSource === 'fallback'
-      ? 'Live list unavailable, showing campus members'
-      : 'Preparing participant source';
-
   const participantsHint = participantsLoading
     ? 'Preparing participant list...'
-    : participantsSource === 'fallback'
-    ? 'Tap to view campus members'
     : 'Tap to view participants';
 
   const proximityText = milestoneProgress.nextMilestone
@@ -312,11 +280,6 @@ export function Pulse() {
             <p className="text-gray-700 dark:text-gray-300 font-medium leading-relaxed">
               {nextActionText}
             </p>
-            {participantsSource === 'fallback' && (
-              <p className="mt-3 text-xs text-violet-700 dark:text-violet-300">
-                Participant drawer is currently using fallback campus-member data.
-              </p>
-            )}
           </div>
         </div>
       </main>
@@ -347,12 +310,15 @@ export function Pulse() {
                 >
                   Active Participants
                 </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {participantsLoading
-                    ? 'Loading participants...'
-                    : `${participants.length} participant${participants.length === 1 ? '' : 's'} listed`}
-                </p>
-                <p className="text-xs text-violet-600 dark:text-violet-300 mt-1">{participantsSourceLabel}</p>
+                {participantsLoading ? (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Loading participants...
+                  </p>
+                ) : (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {participants.length} participant{participants.length === 1 ? '' : 's'} listed
+                  </p>
+                )}
               </div>
               <button
                 type="button"
@@ -377,7 +343,7 @@ export function Pulse() {
                     </p>
                     <button
                       type="button"
-                      onClick={() => void loadFallbackParticipants()}
+                      onClick={() => void fetchParticipants()}
                       className="px-4 py-2 text-sm font-semibold rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/70"
                     >
                       Retry
@@ -387,11 +353,7 @@ export function Pulse() {
               ) : participants.length === 0 ? (
                 <EmptyState
                   title="No participants listed"
-                  message={
-                    participantsSource === 'pulse'
-                      ? 'No one has been marked active yet today.'
-                      : 'No campus members were returned right now.'
-                  }
+                  message={'No participants were returned right now.'}
                   icon={<Users size={48} className="mx-auto text-gray-300" />}
                 />
               ) : (
@@ -403,7 +365,7 @@ export function Pulse() {
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="h-10 w-10 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-200 font-semibold flex items-center justify-center shrink-0">
-                          {getInitials(participant.name)}
+                          {participant.initials}
                         </div>
                         <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
                           {participant.name}
@@ -412,7 +374,7 @@ export function Pulse() {
 
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-200">
-                          {formatCountryLabel(participant.country)}
+                          {formatCultureLabel(participant.culture)}
                         </span>
                         {user?.id === participant.id && (
                           <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-fuchsia-100 dark:bg-fuchsia-900/40 text-fuchsia-700 dark:text-fuchsia-200">
@@ -429,7 +391,5 @@ export function Pulse() {
         </div>
       )}
     </div>
-  );                                                                                                                                      
+  );
 }
-
-

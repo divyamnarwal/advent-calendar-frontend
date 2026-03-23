@@ -1,14 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import {
-  Bolt,
-  Crown,
-  Flame,
-  Lock,
-  ShieldCheck,
-  Sparkles,
-  Trophy,
-  Award,
-} from 'lucide-react';
+import { Bolt, Crown, Flame, Lock, ShieldCheck, Sparkles, Trophy, Award } from 'lucide-react';
 
 const badgeIconMap: Record<string, LucideIcon> = {
   flame: Flame,

@@ -57,7 +57,8 @@ export function ChallengePreview({
       {/* Category Badge */}
       <span
         className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4 ${
-          categoryColors[challenge.category] || 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+          categoryColors[challenge.category] ||
+          'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
         }`}
       >
         {categoryLabels[challenge.category] || challenge.category}
@@ -76,7 +77,12 @@ export function ChallengePreview({
       {/* Energy Level */}
       <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
         <Flame size={16} />
-        <span>Energy Level: <span className="font-semibold">{energyLabels[challenge.energyLevel] || challenge.energyLevel}</span></span>
+        <span>
+          Energy Level:{' '}
+          <span className="font-semibold">
+            {energyLabels[challenge.energyLevel] || challenge.energyLevel}
+          </span>
+        </span>
       </div>
 
       {/* Buttons */}

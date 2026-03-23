@@ -21,12 +21,11 @@ export async function apiCall<T>(
   const url = `${API_BASE}${endpoint}`;
 
   const controller = options.signal ? null : new AbortController();
-  const timer = controller
-    ? setTimeout(() => controller.abort(), timeoutMs)
-    : null;
+  const timer = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
 
   try {
-    const shouldAttachAuth = Boolean(authTokenProvider) && !new Headers(options.headers).has('Authorization');
+    const shouldAttachAuth =
+      Boolean(authTokenProvider) && !new Headers(options.headers).has('Authorization');
 
     const performRequest = async () => {
       const headers = new Headers(options.headers);

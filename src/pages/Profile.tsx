@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from 'react';
 import { Camera, Flame, Mail, Save, Trophy, UserRound } from 'lucide-react';
 import { Navigation } from '../components/Navigation';
 import { LoadingSpinner } from '../components/LoadingSpinner';
@@ -7,9 +15,11 @@ import { BadgeCard } from '../components/profile/BadgeCard';
 import { BadgeDetailsModal } from '../components/profile/BadgeDetailsModal';
 import { BadgeUnlockCelebration } from '../components/profile/BadgeUnlockCelebration';
 import { ThemePreferenceSelector } from '../components/profile/ThemePreferenceSelector';
+import { apiGet } from '../api/client';
 import { getProfile, getProfileBadges, updateProfile, updateProfileTheme } from '../api/profile';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../contexts/ThemeContext';
+import { compressImage } from '../utils/compressImage';
 import type {
   ProfileBadge,
   ProfileBadgesResponse,
@@ -17,6 +27,18 @@ import type {
   ThemePreference,
   UserProfile,
 } from '../types';
+
+interface PhotoUploadSignatureResponse {
+  cloudName: string;
+  apiKey: string;
+  folder: string;
+  timestamp: number;
+  signature: string;
+}
+
+interface CloudinaryUploadResponse {
+  secure_url: string;
+}
 
 export function Profile() {
   const { hasActiveSession, isLoading: isAuthLoading } = useAuth();
@@ -34,8 +56,11 @@ export function Profile() {
   const [selectedBadge, setSelectedBadge] = useState<ProfileBadge | null>(null);
   const [unlockBadges, setUnlockBadges] = useState<ProfileBadge[]>([]);
   const [isUnlockOpen, setIsUnlockOpen] = useState<boolean>(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState<boolean>(false);
+  const [avatarUploadError, setAvatarUploadError] = useState<string | null>(null);
 
   const seenUnlockBadgeIdsRef = useRef<Set<string>>(new Set());
+  const avatarInputRef = useRef<HTMLInputElement | null>(null);
 
   const earnedBadges = useMemo(() => badges.filter((badge) => badge.earned), [badges]);
 
@@ -67,7 +92,9 @@ export function Profile() {
     }
 
     unseenUnlockIds.forEach((id) => seenUnlockBadgeIdsRef.current.add(id));
-    const unlockedBadgeModels = availableBadges.filter((badge) => unseenUnlockIds.includes(badge.id));
+    const unlockedBadgeModels = availableBadges.filter((badge) =>
+      unseenUnlockIds.includes(badge.id)
+    );
 
     if (unlockedBadgeModels.length > 0) {
       setUnlockBadges(unlockedBadgeModels);
@@ -182,9 +209,7 @@ export function Profile() {
 
     const previousPreference = profile.themePreference;
     setThemePreference(nextPreference);
-    setProfile((current) =>
-      current ? { ...current, themePreference: nextPreference } : current
-    );
+    setProfile((current) => (current ? { ...current, themePreference: nextPreference } : current));
 
     try {
       const updatedProfile = await updateProfileTheme(nextPreference);
@@ -208,7 +233,51 @@ export function Profile() {
     setUnlockBadges([]);
   };
 
+  const handleAvatarSelect = async (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
+    if (!selectedFile) {
+      return;
+    }
+
+    setAvatarUploadError(null);
+    setIsUploadingAvatar(true);
+
+    try {
+      const compressedFile = await compressImage(selectedFile);
+      const signature = await apiGet<PhotoUploadSignatureResponse>('/photos/upload-signature');
+
+      const formData = new FormData();
+      formData.append('file', compressedFile);
+      formData.append('api_key', signature.apiKey);
+      formData.append('timestamp', String(signature.timestamp));
+      formData.append('signature', signature.signature);
+      formData.append('folder', signature.folder);
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${signature.cloudName}/image/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Cloudinary upload failed');
+      }
+
+      const uploaded = (await response.json()) as CloudinaryUploadResponse;
+      setDraftAvatar(uploaded.secure_url);
+    } catch {
+      setAvatarUploadError('Upload failed, try again');
+    } finally {
+      setIsUploadingAvatar(false);
+      event.target.value = '';
+    }
+  };
+
   const totalBadges = badges.length;
+  const avatarPreview = draftAvatar.trim() || profile?.avatar?.trim() || '';
+  const avatarInitial = profile?.name ? profile.name.trim().charAt(0).toUpperCase() : '';
 
   if (isLoading) {
     return (
@@ -259,33 +328,68 @@ export function Profile() {
                   Avatar
                 </p>
 
-                <div className="mt-4 flex justify-center">
-                  {profile?.avatar ? (
-                    <img
-                      src={profile.avatar}
-                      alt={`${profile.name} avatar`}
-                      className="h-24 w-24 rounded-2xl border border-violet-200 dark:border-violet-700 object-cover bg-white dark:bg-gray-800"
-                      onError={(event) => {
-                        event.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <div className="inline-flex h-24 w-24 items-center justify-center rounded-2xl border border-violet-200 dark:border-violet-700 bg-white dark:bg-gray-800 text-2xl font-semibold text-violet-700 dark:text-violet-300">
-                      {profile?.name ? profile.name.trim().charAt(0).toUpperCase() : <UserRound size={30} />}
-                    </div>
+                <div className="mt-4 flex flex-col items-center">
+                  <button
+                    type="button"
+                    onClick={() => avatarInputRef.current?.click()}
+                    className="group relative inline-flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-violet-200 dark:border-violet-700 bg-white dark:bg-gray-800 text-2xl font-semibold text-violet-700 dark:text-violet-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/70 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
+                    aria-label="Change avatar photo"
+                  >
+                    {avatarPreview ? (
+                      <img
+                        src={avatarPreview}
+                        alt={`${profile?.name ?? 'Profile'} avatar`}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : avatarInitial ? (
+                      avatarInitial
+                    ) : (
+                      <UserRound size={30} />
+                    )}
+
+                    <span className="pointer-events-none absolute inset-0 bg-black/0 transition-colors duration-200 group-hover:bg-black/10" />
+                    <span className="pointer-events-none absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full bg-violet-600 text-white shadow-md transition-transform duration-200 group-hover:scale-105">
+                      {isUploadingAvatar ? (
+                        <LoadingSpinner size="small" className="text-white" />
+                      ) : (
+                        <Camera size={14} />
+                      )}
+                    </span>
+                  </button>
+
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarSelect}
+                    className="hidden"
+                  />
+
+                  <p className="mt-3 text-xs text-gray-600 dark:text-gray-400">
+                    Click avatar to change photo
+                  </p>
+
+                  {avatarUploadError && (
+                    <p className="mt-2 text-xs font-medium text-red-600 dark:text-red-400">
+                      Upload failed, try again
+                    </p>
                   )}
                 </div>
 
                 <div className="mt-5 grid gap-3">
                   <div className="rounded-xl bg-white/80 dark:bg-gray-900/80 px-3 py-2 border border-violet-100 dark:border-violet-800/40">
-                    <p className="text-[11px] uppercase tracking-[0.08em] text-gray-500 dark:text-gray-400">Streak</p>
+                    <p className="text-[11px] uppercase tracking-[0.08em] text-gray-500 dark:text-gray-400">
+                      Streak
+                    </p>
                     <p className="mt-1 flex items-center gap-1 text-base font-semibold text-gray-900 dark:text-gray-100">
                       <Flame size={14} className="text-orange-500" />
                       {profile?.streak ?? 0} days
                     </p>
                   </div>
                   <div className="rounded-xl bg-white/80 dark:bg-gray-900/80 px-3 py-2 border border-violet-100 dark:border-violet-800/40">
-                    <p className="text-[11px] uppercase tracking-[0.08em] text-gray-500 dark:text-gray-400">Total Points</p>
+                    <p className="text-[11px] uppercase tracking-[0.08em] text-gray-500 dark:text-gray-400">
+                      Total Points
+                    </p>
                     <p className="mt-1 flex items-center gap-1 text-base font-semibold text-gray-900 dark:text-gray-100">
                       <Trophy size={14} className="text-violet-600 dark:text-violet-300" />
                       {profile?.totalPoints ?? 0}
@@ -296,7 +400,9 @@ export function Profile() {
 
               <form onSubmit={handleProfileSave} className="space-y-4">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+                  <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Name
+                  </label>
                   <input
                     value={draftName}
                     onChange={(event) => setDraftName(event.target.value)}
@@ -307,21 +413,17 @@ export function Profile() {
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    <span className="inline-flex items-center gap-1">
-                      <Camera size={14} />
-                      Avatar URL
-                    </span>
+                    Avatar
                   </label>
-                  <input
-                    value={draftAvatar}
-                    onChange={(event) => setDraftAvatar(event.target.value)}
-                    className="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white/90 dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100"
-                    placeholder="https://example.com/avatar.jpg"
-                  />
+                  <p className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 px-3 py-2.5 text-sm text-gray-600 dark:text-gray-400">
+                    Use the avatar picker on the left to upload a profile photo.
+                  </p>
                 </div>
 
                 <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 px-3 py-2.5">
-                  <p className="text-xs uppercase tracking-[0.08em] text-gray-500 dark:text-gray-400">Email</p>
+                  <p className="text-xs uppercase tracking-[0.08em] text-gray-500 dark:text-gray-400">
+                    Email
+                  </p>
                   <p className="mt-1 inline-flex items-center gap-2 text-sm font-medium text-gray-800 dark:text-gray-200">
                     <Mail size={14} />
                     {profile?.email ?? '-'}
@@ -343,7 +445,9 @@ export function Profile() {
           <section className="rounded-3xl border border-gray-200/80 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 p-6">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 font-serif">Badges</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 font-serif">
+                  Badges
+                </h2>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   Earned {earnedBadges.length} of {totalBadges} available badges.
                 </p>
@@ -367,7 +471,9 @@ export function Profile() {
           </section>
 
           <section className="rounded-3xl border border-gray-200/80 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 p-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 font-serif">Settings</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 font-serif">
+              Settings
+            </h2>
             <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
               Theme controls are now managed inside your profile and synced with backend preference.
             </p>
@@ -384,7 +490,11 @@ export function Profile() {
       </main>
 
       <BadgeDetailsModal badge={selectedBadge} onClose={() => setSelectedBadge(null)} />
-      <BadgeUnlockCelebration badges={unlockBadges} isOpen={isUnlockOpen} onClose={closeUnlockModal} />
+      <BadgeUnlockCelebration
+        badges={unlockBadges}
+        isOpen={isUnlockOpen}
+        onClose={closeUnlockModal}
+      />
     </div>
   );
 }

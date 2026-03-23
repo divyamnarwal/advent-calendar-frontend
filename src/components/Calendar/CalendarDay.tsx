@@ -34,7 +34,8 @@ export function CalendarDay({ day, onClick }: CalendarDayProps) {
       </>
     );
   } else if (isCompleted) {
-    stateClasses = 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-2 border-green-200 dark:border-green-800';
+    stateClasses =
+      'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-2 border-green-200 dark:border-green-800';
     content = (
       <>
         <span>{dayOfMonth}</span>
@@ -42,17 +43,20 @@ export function CalendarDay({ day, onClick }: CalendarDayProps) {
       </>
     );
   } else if (isToday) {
-    stateClasses = 'bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white shadow-lg shadow-violet-200 dark:shadow-violet-900/50';
+    stateClasses =
+      'bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white shadow-lg shadow-violet-200 dark:shadow-violet-900/50';
   } else {
-    stateClasses = 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-2 border-gray-200 dark:border-gray-700 hover:border-violet-300 hover:bg-violet-50 dark:hover:bg-violet-900/20';
+    stateClasses =
+      'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-2 border-gray-200 dark:border-gray-700 hover:border-violet-300 hover:bg-violet-50 dark:hover:bg-violet-900/20';
   }
 
   // Keep the "Today" label in normal flow so it doesn't escape the calendar container.
-  const todayIndicator = isToday && !isCompleted ? (
-    <span className="mt-1 text-[11px] font-semibold text-violet-600 dark:text-violet-300 leading-none">
-      Today
-    </span>
-  ) : null;
+  const todayIndicator =
+    isToday && !isCompleted ? (
+      <span className="mt-1 text-[11px] font-semibold text-violet-600 dark:text-violet-300 leading-none">
+        Today
+      </span>
+    ) : null;
 
   return (
     <div className="flex flex-col items-center">

@@ -33,10 +33,24 @@
   animation: dayReveal 0.3s ease-out backwards;
 }
 
-.day-tile:nth-child(1) { animation-delay: 0.02s; }
-.day-tile:nth-child(2) { animation-delay: 0.04s; }
-.day-tile:nth-child(3) { animation-delay: 0.06s; }
-.day-tile:nth-child(4) { animation-delay: 0.08s; }
-.day-tile:nth-child(5) { animation-delay: 0.1s; }
-.day-tile:nth-child(6) { animation-delay: 0.12s; }
-.day-tile:nth-child(7) { animation-delay: 0.14s; }
+.day-tile:nth-child(1) {
+  animation-delay: 0.02s;
+}
+.day-tile:nth-child(2) {
+  animation-delay: 0.04s;
+}
+.day-tile:nth-child(3) {
+  animation-delay: 0.06s;
+}
+.day-tile:nth-child(4) {
+  animation-delay: 0.08s;
+}
+.day-tile:nth-child(5) {
+  animation-delay: 0.1s;
+}
+.day-tile:nth-child(6) {
+  animation-delay: 0.12s;
+}
+.day-tile:nth-child(7) {
+  animation-delay: 0.14s;
+}
