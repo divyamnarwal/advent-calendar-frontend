@@ -16,8 +16,9 @@ export function CalendarDay({ day, onClick }: CalendarDayProps) {
 
   // Base styles
   const baseClasses = `
-    relative aspect-square rounded-xl flex items-center justify-center
-    font-semibold text-lg transition-all duration-200 cursor-pointer card-hover
+    relative w-full max-w-[3rem] md:max-w-[3.25rem] aspect-square rounded-xl
+    flex items-center justify-center font-semibold text-base md:text-lg
+    transition-all duration-200 cursor-pointer card-hover
     ${isLocked ? 'cursor-not-allowed' : 'hover:scale-105 active:scale-95'}
   `;
 
@@ -59,7 +60,7 @@ export function CalendarDay({ day, onClick }: CalendarDayProps) {
     ) : null;
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex min-w-0 flex-col items-center">
       <button
         onClick={() => !isLocked && onClick()}
         disabled={isLocked}
@@ -75,11 +76,11 @@ export function CalendarDay({ day, onClick }: CalendarDayProps) {
 
 export function CalendarHeader() {
   return (
-    <div className="grid grid-cols-7 gap-2 mb-4">
+    <div className="mb-3 grid grid-cols-7 gap-1.5 md:gap-2">
       {weekdayInitials.map((day, index) => (
         <div
           key={index}
-          className="text-center text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide"
+          className="text-center text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400 md:text-sm"
         >
           {day}
         </div>

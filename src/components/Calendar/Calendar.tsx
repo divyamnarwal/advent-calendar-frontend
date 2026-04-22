@@ -20,7 +20,7 @@ export function Calendar({ days, onDayClick, month }: CalendarProps) {
   const emptyDays = Array.from({ length: firstDayOfWeek }, (_, i) => i);
 
   return (
-    <div className="w-full">
+    <div className="mx-auto w-full max-w-[32rem] md:max-w-[36rem]">
       {monthName && (
         <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6 font-serif text-center">
           {monthName}
@@ -29,7 +29,7 @@ export function Calendar({ days, onDayClick, month }: CalendarProps) {
 
       <CalendarHeader />
 
-      <div className="grid grid-cols-7 gap-2 pb-20 md:pb-8">
+      <div className="grid grid-cols-7 gap-1.5 pb-3 md:gap-2 md:pb-2">
         {emptyDays.map((_, index) => (
           <div key={`empty-${index}`} className="aspect-square" />
         ))}
