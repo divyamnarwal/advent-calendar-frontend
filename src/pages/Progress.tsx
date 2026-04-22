@@ -7,6 +7,7 @@ import {
   Trash2,
   RotateCcw,
   CheckCircle2,
+  Circle,
   AlertTriangle,
   X,
   ChevronDown,
@@ -14,7 +15,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useUserChallenges } from '../hooks/useChallenges';
-import { getUserProgress, clearPendingChallenges } from '../api/userChallenges';
+import { getUserProgress, clearPendingChallenges, markComplete } from '../api/userChallenges';
 import { calculateStreakStats } from '../utils/streak';
 import type { Progress, ClearPendingChallengesResponse, UserChallenge } from '../types';
 
@@ -38,6 +39,7 @@ export function Progress() {
   const [selectedChallenge, setSelectedChallenge] = useState<UserChallenge | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isPendingExpanded, setIsPendingExpanded] = useState(false);
+  const [isMarkingComplete, setIsMarkingComplete] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -136,6 +138,25 @@ export function Progress() {
       console.error('Failed to clear pending challenges:', err);
     } finally {
       setIsClearing(false);
+    }
+  };
+
+  const handleMarkSelectedComplete = async () => {
+    if (!user || !selectedChallenge || selectedChallenge.status !== 'ASSIGNED') {
+      return;
+    }
+
+    setIsMarkingComplete(true);
+    try {
+      const updatedChallenge = await markComplete(selectedChallenge.id);
+      setSelectedChallenge(updatedChallenge);
+      await refetch();
+      const refreshedProgress = await getUserProgress(user.id);
+      setProgress(refreshedProgress);
+    } catch (err) {
+      console.error('Failed to mark challenge complete:', err);
+    } finally {
+      setIsMarkingComplete(false);
     }
   };
 
@@ -481,9 +502,34 @@ export function Progress() {
                 </div>
 
                 {selectedChallenge.status === 'ASSIGNED' && (
-                  <p className="text-xs text-violet-700 dark:text-violet-300">
-                    This challenge is currently pending. Finish it to move it to completed.
-                  </p>
+                  <div className="space-y-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void handleMarkSelectedComplete();
+                      }}
+                      disabled={isMarkingComplete}
+                      className="flex w-full items-center justify-between rounded-xl border border-violet-200 dark:border-violet-800/70 bg-violet-50 dark:bg-violet-900/20 px-4 py-3 text-left transition-colors hover:bg-violet-100 dark:hover:bg-violet-900/30 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="inline-flex h-5 w-5 items-center justify-center rounded border border-violet-400 dark:border-violet-500 bg-white dark:bg-gray-900">
+                          {isMarkingComplete ? (
+                            <RotateCcw size={12} className="animate-spin text-violet-600 dark:text-violet-300" />
+                          ) : (
+                            <Circle size={12} className="text-violet-600 dark:text-violet-300" />
+                          )}
+                        </span>
+                        <span className="text-sm font-medium text-violet-800 dark:text-violet-200">
+                          {isMarkingComplete ? 'Marking complete...' : 'Mark complete'}
+                        </span>
+                      </div>
+                      <CheckCircle2 size={16} className="text-violet-600 dark:text-violet-300" />
+                    </button>
+
+                    <p className="text-xs text-violet-700 dark:text-violet-300">
+                      This challenge is currently pending. Finish it here to move it to completed.
+                    </p>
+                  </div>
                 )}
               </div>
             </div>

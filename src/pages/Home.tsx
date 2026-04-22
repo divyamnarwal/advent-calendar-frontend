@@ -113,6 +113,12 @@ export function Home() {
     clearPreview,
   } = useChallenges();
 
+  const heroDisplayedChallenge = joinedChallenge?.challenge ?? previewedChallenge ?? todayChallenge;
+  const heroDisplayedStatus =
+    todayStatus === 'ASSIGNED' || todayStatus === 'COMPLETED'
+      ? todayStatus
+      : joinedChallenge?.status ?? (previewedChallenge ? 'PREVIEW' : null);
+
   const resetCaptureState = () => {
     if (capturePreviewUrl) {
       URL.revokeObjectURL(capturePreviewUrl);
@@ -328,25 +334,26 @@ export function Home() {
                   Today&apos;s Challenge
                 </p>
 
-                {todayStatus === 'COMPLETED' ? (
+                {heroDisplayedStatus === 'COMPLETED' ? (
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/35 text-green-700 dark:text-green-300">
                     <CheckCircle2 size={14} />
                     Completed
                   </span>
-                ) : todayStatus === 'ASSIGNED' && todayChallenge?.category ? (
+                ) : (heroDisplayedStatus === 'ASSIGNED' || heroDisplayedStatus === 'PREVIEW') &&
+                  heroDisplayedChallenge?.category ? (
                   <span className="px-2 py-0.5 rounded-full text-[9px] font-medium uppercase tracking-[0.1em] bg-gray-100/70 dark:bg-gray-800/60 text-gray-500 dark:text-gray-400 border border-gray-200/70 dark:border-gray-700/70 opacity-75">
-                    {todayChallenge.category.replace(/_/g, ' ')}
+                    {heroDisplayedChallenge.category.replace(/_/g, ' ')}
                   </span>
                 ) : null}
               </div>
 
-              {todayStatus === 'ASSIGNED' ? (
+              {heroDisplayedStatus === 'ASSIGNED' ? (
                 <>
                   <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 font-serif leading-tight mb-3">
-                    {todayChallenge?.title || "Today's Challenge"}
+                    {heroDisplayedChallenge?.title || "Today's Challenge"}
                   </h1>
                   <p className="text-gray-600 dark:text-gray-400 mb-4 max-w-2xl leading-relaxed">
-                    {todayChallenge?.description ||
+                    {heroDisplayedChallenge?.description ||
                       'Your challenge is ready. Complete it to keep your streak alive.'}
                   </p>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
@@ -361,25 +368,27 @@ export function Home() {
                       <Clock3 size={15} className="text-fuchsia-500 dark:text-fuchsia-300" />
                       {formatAssignedAge(
                         todayTile?.userChallenge?.assignedDate ??
-                          todayTile?.userChallenge?.startTime
+                          joinedChallenge?.assignedDate ??
+                          todayTile?.userChallenge?.startTime ??
+                          joinedChallenge?.startTime
                       )}
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-3 text-sm text-gray-600 dark:text-gray-300">
                     <span className="inline-flex items-center gap-1.5">
                       <Flame size={16} className="text-orange-500" />
-                      {todayChallenge?.energyLevel || 'Energy set'}
+                      {heroDisplayedChallenge?.energyLevel || 'Energy set'}
                     </span>
                     <span className="inline-flex items-center gap-1.5">
                       <Globe2 size={16} className="text-teal-500" />
-                      {todayChallenge?.culture || user?.country || 'Global'}
+                      {heroDisplayedChallenge?.culture || user?.country || 'Global'}
                     </span>
                   </div>
                 </>
-              ) : todayStatus === 'COMPLETED' ? (
+              ) : heroDisplayedStatus === 'COMPLETED' ? (
                 <>
                   <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 font-serif leading-tight mb-2">
-                    {todayChallenge?.title || "Today's Challenge"}
+                    {heroDisplayedChallenge?.title || "Today's Challenge"}
                   </h1>
                   <p className="text-sm font-medium text-green-700 dark:text-green-300 mb-4">
                     {formatCompletedTime(todayTile?.userChallenge?.completionTime)}
@@ -396,6 +405,31 @@ export function Home() {
                   >
                     View Challenge Details
                   </button>
+                </>
+              ) : heroDisplayedStatus === 'PREVIEW' ? (
+                <>
+                  <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 font-serif leading-tight mb-3">
+                    {heroDisplayedChallenge?.title || "Today's Challenge"}
+                  </h1>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4 max-w-2xl leading-relaxed">
+                    {heroDisplayedChallenge?.description ||
+                      'Your selected challenge is ready. Start it when you are ready.'}
+                  </p>
+                  <div className="flex flex-wrap gap-3 text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Flame size={16} className="text-orange-500" />
+                      {heroDisplayedChallenge?.energyLevel || 'Energy set'}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <Globe2 size={16} className="text-teal-500" />
+                      {heroDisplayedChallenge?.culture || user?.country || 'Global'}
+                    </span>
+                  </div>
+                  <div className="rounded-2xl border border-violet-200 dark:border-violet-900/50 bg-violet-50/80 dark:bg-violet-900/20 px-4 py-3">
+                    <p className="text-sm font-medium text-violet-700 dark:text-violet-300">
+                      Challenge selected. Review it in the dialog and start when you&apos;re ready.
+                    </p>
+                  </div>
                 </>
               ) : (
                 <>
