@@ -291,7 +291,7 @@ export function Profile() {
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-pink-50 dark:from-[#0f0a15] dark:via-[#160c25] dark:to-[#1a0f20]">
       <Navigation />
 
-      <main className="md:ml-64 pb-24 md:pb-8">
+      <main className="md:ml-64 pb-36 md:pb-8">
         <div className="mx-auto max-w-5xl px-4 py-8 space-y-6">
           <section className="rounded-3xl border border-violet-200/80 dark:border-violet-800/60 bg-white/85 dark:bg-gray-900/80 p-6 shadow-soft">
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-violet-600 dark:text-violet-300">

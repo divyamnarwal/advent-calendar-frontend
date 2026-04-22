@@ -25,14 +25,14 @@ export function Navigation() {
     <>
       {/* Mobile bottom navigation */}
       <nav className="mobile-nav fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 md:hidden z-50">
-        <div className="flex items-center justify-around py-2">
+        <div className="grid grid-cols-4 gap-1 px-2 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)]">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
               <NavLink
                 key={item.path}
                 to={item.path}
-                className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-all hover-lift-subtle ${
+                className={`flex min-h-[4rem] flex-col items-center justify-center gap-1 rounded-lg px-2 py-2 text-center transition-all hover-lift-subtle ${
                   isActive
                     ? 'text-violet-600 bg-violet-50 dark:bg-violet-900/30'
                     : 'text-gray-500 dark:text-gray-400 hover:text-violet-600'
@@ -47,7 +47,7 @@ export function Navigation() {
             onClick={() => {
               void logout();
             }}
-            className="flex flex-col items-center gap-1 px-3 py-1 rounded-lg text-gray-500 dark:text-gray-400 hover:text-red-500 transition-colors"
+            className="flex min-h-[4rem] flex-col items-center justify-center gap-1 rounded-lg px-2 py-2 text-center text-gray-500 transition-colors dark:text-gray-400 hover:text-red-500"
           >
             <LogOut size={20} />
             <span className="text-xs font-medium">Logout</span>

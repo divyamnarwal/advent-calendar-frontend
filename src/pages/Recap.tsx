@@ -27,7 +27,7 @@ function RecapShell({ children }: RecapShellProps) {
   return (
     <div className="min-h-screen recap-shell bg-gradient-to-br from-violet-50 via-purple-50 to-pink-50 dark:from-[#0f0a15] dark:via-[#160c25] dark:to-[#1a0f20]">
       <Navigation />
-      <main className="md:ml-64 pb-24 md:pb-8">
+      <main className="md:ml-64 pb-36 md:pb-8">
         <div className="max-w-3xl mx-auto px-4 py-8">{children}</div>
       </main>
     </div>

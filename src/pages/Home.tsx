@@ -308,7 +308,7 @@ export function Home() {
       <Navigation />
 
       {/* Main Content */}
-      <main className="md:ml-64 pb-24 md:pb-8">
+      <main className="md:ml-64 pb-36 md:pb-8">
         <div className="max-w-3xl mx-auto px-4 py-8 space-y-4 md:space-y-5">
           {/* Secondary Greeting */}
           {user && (

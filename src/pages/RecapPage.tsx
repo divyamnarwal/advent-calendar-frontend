@@ -243,7 +243,7 @@ export function RecapPage() {
     <div className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top_left,_rgba(254,240,138,0.45),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(251,113,133,0.2),_transparent_32%),linear-gradient(180deg,_#fff9ef_0%,_#f8f2ff_48%,_#eef6ff_100%)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(251,191,36,0.12),_transparent_24%),radial-gradient(circle_at_top_right,_rgba(244,114,182,0.12),_transparent_28%),linear-gradient(180deg,_#0f172a_0%,_#111827_50%,_#172033_100%)]">
       <Navigation />
 
-      <main className="relative md:ml-64 pb-24 md:pb-8">
+      <main className="relative md:ml-64 pb-36 md:pb-8">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.85),_transparent_70%)] dark:bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.08),_transparent_70%)]" />
 
         <div className="relative mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">

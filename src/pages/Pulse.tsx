@@ -162,7 +162,7 @@ export function Pulse() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-pink-50 dark:from-[#0f0a15] dark:via-[#160c25] dark:to-[#1a0f20]">
         <Navigation />
-        <main className="md:ml-64 pb-24 md:pb-8">
+        <main className="md:ml-64 pb-36 md:pb-8">
           <div className="max-w-2xl mx-auto px-4 py-8">
             <EmptyState
               title="Pulse unavailable"
@@ -179,7 +179,7 @@ export function Pulse() {
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-pink-50 dark:from-[#0f0a15] dark:via-[#160c25] dark:to-[#1a0f20]">
       <Navigation />
 
-      <main className="md:ml-64 pb-24 md:pb-8">
+      <main className="md:ml-64 pb-36 md:pb-8">
         <div className="max-w-2xl mx-auto px-4 py-8">
           <div className="text-center mb-8">
             <Flame className="text-orange-500 mx-auto mb-4" size={48} />
